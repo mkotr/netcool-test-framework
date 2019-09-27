@@ -22,9 +22,10 @@ type Probe struct {
 }
 
 func ProbeConfigServer(w http.ResponseWriter, r *http.Request) {
+	probeName := r.URL.Path[len("/probes/"):]
 
 	probe := Probe{
-		"OMI",
+		probeName,
 		"xxx",
 		"lxapp6662.dc.corp.telstra.com",
 		"4000",
