@@ -21,40 +21,77 @@ type Probe struct {
 	Port     string `json:"port"`
 }
 
-func ProbeConfigServer(w http.ResponseWriter, r *http.Request) {
-	probeName := r.URL.Path[len("/probes/"):]
+type ProbeStore interface {
+	GetProbe(name string) Probe
+	GetAll() []Probe
+}
 
-	probe := Probe{
-		probeName,
-		"xxx",
-		"lxapp6662.dc.corp.telstra.com",
-		"4000",
+type ProbeConfigServer struct {
+	store ProbeStore
+}
+
+func (p *ProbeConfigServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	name := r.URL.Path[len("/probes/"):]
+
+	if name != "" {
+		probe := p.store.GetProbe(name)
+		if (probe == Probe{}) {
+			w.WriteHeader(http.StatusNotFound)
+		} else {
+			json.NewEncoder(w).Encode(probe)
+		}
+	} else {
+		probes := p.store.GetAll()
+		if len(probes) == 0 {
+			w.WriteHeader(http.StatusNotFound)
+		}
+		json.NewEncoder(w).Encode(probes)
 	}
+}
 
-	json.NewEncoder(w).Encode(probe)
-	//w.WriteHeader(http.StatusOK)
+type InMemoryProbeStore struct {
+	file   os.File
+	probes map[string]Probe
+}
+
+func (i *InMemoryProbeStore) GetProbe(name string) Probe {
+	return i.probes[name]
+}
+func (i *InMemoryProbeStore) GetAll() []Probe {
+	var probes []Probe
+	for _, probe := range i.probes {
+		probes = append(probes, probe)
+	}
+	return probes
 }
 
 func main() {
-	fmt.Println("hello world!")
-
 	//read Config file
-	readConfig()
+	file, err := os.Open(FILENAME)
+	if err != nil {
+		log.Fatalf("Error reading config file %v", err)
+	}
+	defer file.Close()
 
-	handler := http.HandlerFunc(ProbeConfigServer)
-	if err := http.ListenAndServe(":5000", handler); err != nil {
+	probes := readConfig(file)
+
+	store := InMemoryProbeStore{
+		file:   *file,
+		probes: probes,
+	}
+
+	server := &ProbeConfigServer{&store}
+
+	if err := http.ListenAndServe(":5000", server); err != nil {
 		log.Fatalf("Could not listen on port 5000 %v", err)
 	}
 }
 
-func readConfig() {
-
-	file, err := os.Open(FILENAME)
-	if err != nil {
-		log.Fatalf("Error occured when opening the config file: %v\n", err)
-	}
+func readConfig(file *os.File) map[string]Probe {
 	r := csv.NewReader(file)
 	r.Comment = rune('#')
+
+	probes := make(map[string]Probe)
 
 	for {
 		line, err := r.Read()
@@ -75,7 +112,9 @@ func readConfig() {
 			line[3],
 		}
 
-		log.Println(probe)
-	}
+		probes[probe.Name] = probe
 
+		log.Printf("read probe config: %v", probe)
+	}
+	return probes
 }
