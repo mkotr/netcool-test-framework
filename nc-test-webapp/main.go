@@ -6,5 +6,10 @@ import (
 )
 
 func main() {
+	//beego.BConfig.WebConfig.StaticDir["/static"] = "nc-test-web/dist"
+	beego.SetStaticPath("/_nuxt", "web/dist/_nuxt")
+	//beego.SetStaticPath("/js", "web/dist/_nuxt")
+	//beego.SetStaticPath("/img", "nc-test-web/dist/_nuxt")
+
 	beego.Run()
 }
