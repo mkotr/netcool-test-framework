@@ -7,18 +7,21 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"git02.ae.sda.corp.telstra.com/scm/wian/netcool-test-automation/probe-config-service/domain"
+	"git02.ae.sda.corp.telstra.com/scm/wian/netcool-test-automation/probe-config-service/service"
 )
 
 type StubProbeStore struct {
-	probes map[string]Probe
+	probes map[string]domain.Probe
 }
 
-func (s *StubProbeStore) GetProbe(name string) Probe {
+func (s *StubProbeStore) GetProbe(name string) domain.Probe {
 	probe := s.probes[name]
 	return probe
 }
-func (s *StubProbeStore) GetAll() []Probe {
-	var probes []Probe
+func (s *StubProbeStore) GetAll() []domain.Probe {
+	var probes []domain.Probe
 	for _, probe := range s.probes {
 		probes = append(probes, probe)
 	}
@@ -27,14 +30,14 @@ func (s *StubProbeStore) GetAll() []Probe {
 }
 func TestGETProbes(t *testing.T) {
 	store := StubProbeStore{
-		map[string]Probe{
-			"OMI": Probe{
+		map[string]domain.Probe{
+			"OMI": domain.Probe{
 				"OMI",
 				"xxx",
 				"lxapp6662.dc.corp.telstra.com",
 				"4000",
 			},
-			"MessageBus": Probe{
+			"MessageBus": domain.Probe{
 				"MessageBus",
 				"xxx",
 				"lxapp6662.dc.corp.telstra.com",
@@ -43,7 +46,7 @@ func TestGETProbes(t *testing.T) {
 		},
 	}
 
-	server := &ProbeConfigServer{&store}
+	server := NewProbeConfigServer(&store)
 
 	t.Run("returns OMI probe details", func(t *testing.T) {
 		request := newGetProbeRequest("OMI")
@@ -51,7 +54,7 @@ func TestGETProbes(t *testing.T) {
 
 		server.ServeHTTP(response, request)
 
-		want := Probe{
+		want := domain.Probe{
 			"OMI",
 			"xxx",
 			"lxapp6662.dc.corp.telstra.com",
@@ -67,7 +70,7 @@ func TestGETProbes(t *testing.T) {
 		response := httptest.NewRecorder()
 
 		server.ServeHTTP(response, request)
-		want := Probe{
+		want := domain.Probe{
 			"MessageBus",
 			"xxx",
 			"lxapp6662.dc.corp.telstra.com",
@@ -96,17 +99,17 @@ func TestGETProbes(t *testing.T) {
 
 		server.ServeHTTP(response, request)
 
-		var got []Probe
+		var got []domain.Probe
 		json.NewDecoder(response.Body).Decode(&got)
 
-		want := []Probe{
-			Probe{
+		want := []domain.Probe{
+			domain.Probe{
 				"OMI",
 				"xxx",
 				"lxapp6662.dc.corp.telstra.com",
 				"4000",
 			},
-			Probe{
+			domain.Probe{
 				"MessageBus",
 				"xxx",
 				"lxapp6662.dc.corp.telstra.com",
@@ -126,7 +129,7 @@ func TestGETProbes(t *testing.T) {
 
 func TestGetAll(t *testing.T) {
 	store := StubProbeStore{
-		map[string]Probe{},
+		map[string]domain.Probe{},
 	}
 
 	server := &ProbeConfigServer{&store}
@@ -136,10 +139,10 @@ func TestGetAll(t *testing.T) {
 
 		server.ServeHTTP(response, request)
 
-		var got []Probe
+		var got []domain.Probe
 		json.NewDecoder(response.Body).Decode(&got)
 
-		//want := []Probe{}
+		//want := []domain.Probe{}
 
 		assertResponseCode(t, response.Code, http.StatusNotFound)
 
@@ -151,8 +154,8 @@ func newGetProbeRequest(name string) *http.Request {
 	return req
 }
 
-func assertResponseBody(t *testing.T, responseBody *bytes.Buffer, want Probe) {
-	var got Probe
+func assertResponseBody(t *testing.T, responseBody *bytes.Buffer, want domain.Probe) {
+	var got domain.Probe
 	json.NewDecoder(responseBody).Decode(&got)
 	t.Helper()
 	if got != want {

@@ -1,47 +1,60 @@
 package main
 
 import (
-	"encoding/csv"
 	"encoding/json"
 	"fmt"
-	"io"
 	"log"
 	"net/http"
-	"os"
+
+	"git02.ae.sda.corp.telstra.com/scm/wian/netcool-test-automation/probe-config-service/domain"
+	"git02.ae.sda.corp.telstra.com/scm/wian/netcool-test-automation/probe-config-service/service"
+	"github.com/micro/go-micro/config"
 )
 
 const (
-	FILENAME = "config.csv"
+	CONFIG_FILE = "config.json"
 )
 
-type Probe struct {
-	Name     string `json:"name"`
-	Desc     string `json:"desc"`
-	Hostname string `json:"hostname"`
-	Port     string `json:"port"`
-}
-
-type ProbeStore interface {
-	GetProbe(name string) Probe
-	GetAll() []Probe
-}
+//Config xD
 
 type ProbeConfigServer struct {
-	store ProbeStore
+	service *service.ProbeService
+	router  *http.ServeMux
+}
+
+func NewProbeConfigServer(service *service.ProbeService) *ProbeConfigServer {
+	p := &ProbeConfigServer{
+		service,
+		http.NewServeMux(),
+	}
+
+	return p
 }
 
 func (p *ProbeConfigServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+
+	router := http.NewServeMux()
+
+	router.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+	router.Handle("/probes/", http.HandlerFunc(p.probesHandler))
+
+	router.ServeHTTP(w, r)
+}
+
+func (p *ProbeConfigServer) probesHandler(w http.ResponseWriter, r *http.Request) {
 	name := r.URL.Path[len("/probes/"):]
 
 	if name != "" {
-		probe := p.store.GetProbe(name)
-		if (probe == Probe{}) {
+		probe := p.service.GetProbe(name)
+		if (probe == domain.Probe{}) {
 			w.WriteHeader(http.StatusNotFound)
 		} else {
 			json.NewEncoder(w).Encode(probe)
 		}
 	} else {
-		probes := p.store.GetAll()
+		probes := p.service.GetAll()
 		if len(probes) == 0 {
 			w.WriteHeader(http.StatusNotFound)
 		}
@@ -49,72 +62,47 @@ func (p *ProbeConfigServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-type InMemoryProbeStore struct {
-	file   os.File
-	probes map[string]Probe
-}
+//pollConfig - https://micro.mu/docs/go-config.html
+func pollConfig(conf *domain.Config) {
+	for {
+		w, err := config.Watch()
+		if err != nil {
+			fmt.Printf("Cannot watch file path 'probes' %v \n", err)
+		}
 
-func (i *InMemoryProbeStore) GetProbe(name string) Probe {
-	return i.probes[name]
-}
-func (i *InMemoryProbeStore) GetAll() []Probe {
-	var probes []Probe
-	for _, probe := range i.probes {
-		probes = append(probes, probe)
+		v, err := w.Next()
+		if err != nil {
+			fmt.Printf("Cannot get updated file '%v' : %v \n", CONFIG_FILE, err)
+		}
+
+		var tempConf domain.Config
+		v.Scan(&tempConf)
+
+		fmt.Println("After update")
+		*conf = tempConf
 	}
-	return probes
+
 }
 
 func main() {
 	//read Config file
-	file, err := os.Open(FILENAME)
-	if err != nil {
-		log.Fatalf("Error reading config file %v", err)
+
+	config.LoadFile(CONFIG_FILE)
+
+	var conf domain.Config
+	config.Scan(&conf)
+
+	go pollConfig(&conf)
+
+	service := service.ProbeService{
+		Config: &conf,
 	}
-	defer file.Close()
 
-	probes := readConfig(file)
+	server := NewProbeConfigServer(&service)
 
-	store := InMemoryProbeStore{
-		file:   *file,
-		probes: probes,
-	}
-
-	server := &ProbeConfigServer{&store}
+	log.Println("Running on port :5000")
 
 	if err := http.ListenAndServe(":5000", server); err != nil {
 		log.Fatalf("Could not listen on port 5000 %v", err)
 	}
-}
-
-func readConfig(file *os.File) map[string]Probe {
-	r := csv.NewReader(file)
-	r.Comment = rune('#')
-
-	probes := make(map[string]Probe)
-
-	for {
-		line, err := r.Read()
-
-		if err == io.EOF {
-			break
-		}
-
-		if err != nil {
-			log.Println(err)
-		}
-		fmt.Printf("%v,%v,%v,%v\n", line[0], line[1], line[2], line[3])
-
-		probe := Probe{
-			line[0],
-			line[1],
-			line[2],
-			line[3],
-		}
-
-		probes[probe.Name] = probe
-
-		log.Printf("read probe config: %v", probe)
-	}
-	return probes
 }

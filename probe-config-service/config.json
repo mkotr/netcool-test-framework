@@ -1,0 +1,16 @@
+{
+    "probes": {
+        "OMI": {
+            "name": "OMI",
+            "desc": "xxx",
+            "hostname": "lxapp6662.dc.corp.telstra.com",
+            "port": "4000"
+        },
+        "messageBus": {
+            "name": "messageBus",
+            "desc": "xxx",
+            "hostname": "lxapp6661.dc.corp.telstra.com",
+            "port": "4000"
+        }
+    }
+}
