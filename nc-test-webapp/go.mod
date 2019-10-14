@@ -1,6 +1,6 @@
 module git02.ae.sda.corp.telstra.com/scm/wian/netcool-test-automation/nc-test-webapp
 
-go 1.13
+go 1.12
 
 require (
 	github.com/astaxie/beego v1.12.0

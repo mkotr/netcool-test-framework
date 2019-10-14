@@ -8,4 +8,8 @@ import (
 
 func init() {
 	beego.Router("/", &controllers.MainController{})
+	beego.Router("/probes", &controllers.ProbeController{})
+
+	//api
+	beego.Router("/api/probes", &controllers.ProbeController{}, "get:GetProbes")
 }
