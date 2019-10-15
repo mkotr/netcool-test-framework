@@ -64,12 +64,12 @@ type ParsedFile struct {
 }
 
 type FileParser struct {
-	file multipart.File
+	File multipart.File
 }
 
-func (f *FileParser) parseFile() (ParsedFile, error) {
+func (f *FileParser) ParseFile() (ParsedFile, error) {
 	buf := bytes.NewBuffer(nil)
-	if _, err := io.Copy(buf, f.file); err != nil {
+	if _, err := io.Copy(buf, f.File); err != nil {
 		return ParsedFile{}, err
 	}
 

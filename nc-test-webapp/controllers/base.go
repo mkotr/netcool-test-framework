@@ -3,6 +3,7 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
+
 	"github.com/astaxie/beego"
 )
 
@@ -47,7 +48,7 @@ func (b *BaseController) Success(data interface{}, msg string) {
 	b.ResJson(result)
 }
 
-//when you want to return more than one data obj..
+//SuccessMultiple - when you want to return more than one data obj..
 func (b *BaseController) SuccessMultiple(data map[string]interface{}, msg string) {
 	result := ResResult{
 		Status:  SUCCESS,

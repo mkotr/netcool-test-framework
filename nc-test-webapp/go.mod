@@ -1,4 +1,4 @@
-module git02.ae.sda.corp.telstra.com/scm/wian/netcool-test-automation/nc-test-webapp
+module github.com/mkotr/netcool-test-automation/nc-test-webapp
 
 go 1.12
 
@@ -12,7 +12,3 @@ require (
 	golang.org/x/text v0.3.2 // indirect
 	gopkg.in/yaml.v2 v2.2.2 // indirect
 )
-
-replace git02.ae.sda.corp.telstra.com/scm/wian/netcool-test-automation/nc-test-webapp/service => ./service
-
-replace git02.ae.sda.corp.telstra.com/scm/wian/netcool-test-automation/nc-test-webapp/domain => ./domain

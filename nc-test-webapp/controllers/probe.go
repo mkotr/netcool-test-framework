@@ -3,7 +3,7 @@ package controllers
 import (
 	"fmt"
 
-	"git02.ae.sda.corp.telstra.com/scm/wian/netcool-test-automation/nc-test-webapp/service"
+	"github.com/mkotr/netcool-test-automation/nc-test-webapp/service"
 	"github.com/astaxie/beego"
 )
 

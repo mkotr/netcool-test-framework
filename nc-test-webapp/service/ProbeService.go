@@ -2,7 +2,7 @@ package service
 
 import (
 	"net/http"
-	"git02.ae.sda.corp.telstra.com/scm/wian/netcool-test-automation/nc-test-webapp/domain"
+	"github.com/mkotr/netcool-test-automation/nc-test-webapp/domain"
 	"encoding/json"
 	"io/ioutil"
 	"fmt"
