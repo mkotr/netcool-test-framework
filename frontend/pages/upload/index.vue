@@ -24,7 +24,9 @@
           <md-file v-model="single" />
         </md-field>
       </div>
+      <div class="md-layout-item"><p>test</p></div>
     </div>
+    <div class="md-layout"><p>Test</p></div>
   </div>
 </template>
 
