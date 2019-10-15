@@ -9,7 +9,9 @@
         >
           <md-icon>menu</md-icon>
         </md-button>
-        <span class="md-title">Netcool Testy McTestFace</span>
+        <nuxt-link to="/">
+          <span class="md-title">Netcool Testy McTestFace</span>
+        </nuxt-link>
       </md-app-toolbar>
 
       <md-app-drawer :md-active.sync="menuVisible" md-persistent="mini">
@@ -33,11 +35,12 @@
             <md-icon>send</md-icon>
             <span class="md-list-item-text">View/Edit a test</span>
           </md-list-item>
-
-          <md-list-item>
-            <md-icon>delete</md-icon>
-            <span class="md-list-item-text">Bulk Upload</span>
-          </md-list-item>
+          <nuxt-link to="upload">
+            <md-list-item>
+              <md-icon>delete</md-icon>
+              <span class="md-list-item-text">Bulk Upload</span>
+            </md-list-item>
+          </nuxt-link>
           <nuxt-link to="probes">
             <md-list-item>
               <md-icon>error</md-icon>
@@ -95,5 +98,12 @@ html {
 .md-drawer {
   width: 230px;
   max-width: calc(100vw - 125px);
+}
+
+.md-list-item-text:hover {
+  color: aquamarine;
+}
+.md-list-icon.md-icon-font.md-theme-default:hover {
+  color: aquamarine;
 }
 </style>

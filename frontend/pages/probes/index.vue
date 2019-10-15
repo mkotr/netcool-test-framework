@@ -51,19 +51,21 @@ export default {
       ]
     }
   },
-  methods: {
-    getProbes: function() {
-      axios.get('/api/probes/')
-    .then((res) => {
-      return { probes: res.probes}
-    })
-    .catch((e) => { 
-      console.log("an error occured. ",e)
-    })
-    }
-  },
   created: function() {
     this.getProbes()
+  },
+  methods: {
+    getProbes: function() {
+      axios
+        .get('/api/probes')
+        .then((res) => {
+          //we do this because as a workaround during dev otherwise it returns a html template.
+          if (Array.isArray(res.data)) this.probes = res.data
+        })
+        .catch((e) => {
+          console.log('an error occured. ', e)
+        })
+    }
   }
 }
 </script>

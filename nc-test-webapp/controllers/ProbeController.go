@@ -1,33 +1,29 @@
 package controllers
 
 import (
-	"github.com/astaxie/beego"
 	"fmt"
+
+	"git02.ae.sda.corp.telstra.com/scm/wian/netcool-test-automation/nc-test-webapp/service"
+	"github.com/astaxie/beego"
 )
 
+//ProbeController - handler for probe api
 type ProbeController struct {
 	beego.Controller
+	service service.ProbeService
 }
 
-type Probe struct{
-	Name string `json:"name"`
-	Desc string `json:"desc"`
-	Hostname string `json:"hostname"`
-	Port string `json:"port"`
-}
-
+//Get - the page for this route.
 func (p *ProbeController) Get() {
 	p.TplName = "probes/index.html"
 }
 
+//GetProbes - retrieves probe information from service.
 func (p *ProbeController) GetProbes() {
-	probe := Probe{
-		Name: "name",
-		Desc: "desc",
-		Hostname: "hostname",
-		Port: "port",
+	probes, err := p.service.GetAll()
+	if err != nil {
+		fmt.Println("error")
 	}
-	fmt.Println("hello")
-	p.Data["json"] = &probe
+	p.Data["json"] = &probes
 	p.ServeJSON()
 }
