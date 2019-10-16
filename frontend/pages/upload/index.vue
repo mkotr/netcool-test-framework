@@ -6,7 +6,7 @@
       </div>
     </div>
     <div class="md-layout">
-      <div class="md-layout-item md-size-25">
+      <div class="md-layout-item md-size-50">
         <p class="md-body-1">
           Bulk upload your test cases using an .xlsx file
         </p>
@@ -19,22 +19,69 @@
         <p class="md-subheading">
           Upload your file below:
         </p>
-        <md-field>
-          <label>Click here to upload.</label>
-          <md-file v-model="single" />
-        </md-field>
+        <div class="md-layout-item md-layout md-gutter">
+          <div class="md-layout-item">
+            <md-field>
+              <label>Click here to upload.</label>
+              <md-file
+                v-model="singleFile"
+                @md-change="handleFileInputChange()"
+              />
+            </md-field>
+          </div>
+          <div class="md-layout-item parser-button">
+            <md-button
+              class="md-raised md-primary"
+              :disabled="!isParserButtonDisabled"
+              @click="onParserButtonClick"
+            >
+              Parse File
+            </md-button>
+          </div>
+        </div>
       </div>
-      <div class="md-layout-item"><p>test</p></div>
     </div>
-    <div class="md-layout"><p>Test</p></div>
   </div>
 </template>
 
 <script>
+import axios from 'axios'
+
 export default {
   data: function() {
     return {
-      name: 'Bulk Upload Page'
+      name: 'Bulk Upload Page',
+      singleFile: '',
+      file: null,
+      isParserButtonDisabled: false
+    }
+  },
+  methods: {
+    handleFileInputChange: function() {
+      console.log(this.singleFile)
+      if (this.singleFile) {
+        this.isParserButtonDisabled = true
+        this.file = this.singleFile.target.files[0]
+      }
+    },
+    onParserButtonClick: function() {
+      var formData = new FormData()
+      console.log('the file used is ', this.file.name)
+      formData.append('file', this.file)
+      axios
+        .post('/api/fileParser', formData, {
+          header: {
+            'Content-Type': 'multipart/form-data'
+          }
+        })
+        .then((res) => {
+          if (res.data.status !== 1) alert('An error occurred')
+          //TODO: set the data. from the response.
+          console.log(res)
+        })
+        .catch((e) => {
+          alert('An error occurred: ', e)
+        })
     }
   }
 }
@@ -47,5 +94,8 @@ div.md-layout:not(:first-child) {
 .md-subheading {
   margin-top: 1em;
   margin-bottom: 1em;
+}
+.md-layout-item.parser-button {
+  padding-top: 10px;
 }
 </style>
