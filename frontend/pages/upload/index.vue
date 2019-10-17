@@ -3,10 +3,6 @@
     <div class="md-layout md-alignment-top-center">
       <div class="md-layout-item">
         <span class="md-display-1 ">{{ name }}</span>
-      </div>
-    </div>
-    <div class="md-layout">
-      <div class="md-layout-item md-size-50">
         <p class="md-body-1">
           Bulk upload your test cases using an .xlsx file
         </p>
@@ -40,6 +36,28 @@
           </div>
         </div>
       </div>
+      <div class="md-layout-item">
+        <p>this is where the parsed stuff will be</p>
+        <md-table>
+          <md-table-row>
+            <md-table-head>Test Name</md-table-head>
+            <md-table-head>Sleep Time</md-table-head>
+            <md-table-head>Network Domain</md-table-head>
+            <md-table-head>Test Name</md-table-head>
+            <md-table-head>Test Name</md-table-head>
+            <md-table-head>Test Name</md-table-head>
+            <md-table-head>Test Name</md-table-head>
+          </md-table-row>
+          <md-table-row>
+            <md-table-cell>Test</md-table-cell>
+          </md-table-row>
+        </md-table>
+      </div>
+      <div class="md-layout-item" />
+    </div>
+
+    <div class="md-layout">
+      <p>Hello</p>
     </div>
   </div>
 </template>
@@ -53,7 +71,11 @@ export default {
       name: 'Bulk Upload Page',
       singleFile: '',
       file: null,
-      isParserButtonDisabled: false
+      isParserButtonDisabled: false,
+      tests: null,
+      traps: null,
+      varbinds: null,
+      expectedResults: null
     }
   },
   methods: {
@@ -75,11 +97,22 @@ export default {
           }
         })
         .then((res) => {
-          if (res.data.status !== 1) alert('An error occurred')
+          if (res.data.status === 0) {
+            this.tests = res.data.data.tests
+            this.varbinds = res.data.data.varbinds
+            this.expectedResults = res.data.data.expectedResults
+            this.traps = res.data.data.traps
+
+            console.log('checking the state')
+          }
           //TODO: set the data. from the response.
-          console.log(res)
+          else {
+            alert('An error occurred')
+          }
         })
         .catch((e) => {
+          console.log('error?')
+          console.log(e)
           alert('An error occurred: ', e)
         })
     }

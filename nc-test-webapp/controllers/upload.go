@@ -4,12 +4,12 @@ import (
 	"github.com/mkotr/netcool-test-automation/nc-test-webapp/service"
 )
 
-type FileController struct {
+type UploadController struct {
 	BaseController
 	fileParser service.FileParser
 }
 
-func (f *FileController) ParseFile() {
+func (f *UploadController) ParseFile() {
 	file, _, err := f.GetFile("file")
 
 	if err != nil {

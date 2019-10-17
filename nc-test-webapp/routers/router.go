@@ -12,4 +12,5 @@ func init() {
 
 	//api
 	beego.Router("/api/probes", &controllers.ProbeController{}, "get:GetProbes")
+	beego.Router("/api/fileParser", &controllers.UploadController{}, "post:ParseFile")
 }
