@@ -30,11 +30,12 @@
             <md-icon>move_to_inbox</md-icon>
             <span class="md-list-item-text">Run a test</span>
           </md-list-item>
-
-          <md-list-item>
-            <md-icon>send</md-icon>
-            <span class="md-list-item-text">View/Edit a test</span>
-          </md-list-item>
+          <nuxt-link to="testGroups">
+            <md-list-item>
+              <md-icon>send</md-icon>
+              <span class="md-list-item-text">View/Edit a test</span>
+            </md-list-item>
+          </nuxt-link>
           <nuxt-link to="upload">
             <md-list-item>
               <md-icon>delete</md-icon>
